@@ -40,7 +40,11 @@ func main() {
 	fmt.Println("Listening...")
 	problem := model.GetRandomProblemData()
 	sendText := fmt.Sprintf("今日やるべき問題はこれだ！！\n :ballot_box_with_check: %s \n :link: %s\n", problem.Title, problem.Url)
-	discord.ChannelMessageSend(RoomId, sendText)
+	_, err = discord.ChannelMessageSend(RoomId, sendText)
+	if err != nil{
+		fmt.Printf(err.Error())
+		log.Fatal(err)
+	}
 	return
 }
 
