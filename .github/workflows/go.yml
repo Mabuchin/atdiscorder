@@ -31,6 +31,6 @@ jobs:
     - name: Run
       run: go run main.go
       env:
-        DISCORD_BOT_TOKEN: secrets.DISCORD_BOT_TOKEN
-        DISCORD_BOT_NAME: secrets.DISCORD_BOT_NAME
-        DISCORD_SEND_ROOM_ID: secrets.DISCORD_SEND_ROOM_ID
+        DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }} 
+        DISCORD_BOT_NAME: ${{ secrets.DISCORD_BOT_NAME }}
+        DISCORD_SEND_ROOM_ID: ${{ secrets.DISCORD_SEND_ROOM_ID }}
