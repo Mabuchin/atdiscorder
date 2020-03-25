@@ -2,6 +2,7 @@ package model
 
 import (
 	"github.com/jinzhu/gorm"
+	"strings"
 )
 
 const ProblemBaseDir = "https://atcoder.jp/contests/"
@@ -14,11 +15,13 @@ type Problem struct {
 	Used      bool
 }
 
-func AddAllProblemData(ps []Problem) error {
+func AddProblemList(ps []Problem) error {
 	for _, p := range ps {
-		p.Url = ProblemBaseDir + p.ContestId + "/tasks/" + p.Id
-		p.Used = false
-		db.Create(p)
+		if strings.Index(p.ContestId, "abc") != -1 && strings.Index(p.Id, "_a") == -1 {
+			p.Url = ProblemBaseDir + p.ContestId + "/tasks/" + p.Id
+			p.Used = false
+			db.Create(p)
+		}
 	}
 	return nil
 }

@@ -8,27 +8,22 @@ import (
 	"log"
 	"os"
 	"strings"
-	"sync"
 	"time"
 )
 
 var (
-	Token   = fmt.Sprintf("Bot %v",os.Getenv("DISCORD_BOT_TOKEN"))
+	Token   = fmt.Sprintf("Bot %v", os.Getenv("DISCORD_BOT_TOKEN"))
 	BotName = os.Getenv("DISCORD_BOT_NAME")
 	RoomId  = os.Getenv("DISCORD_SEND_ROOM_ID")
-	wg      = sync.WaitGroup{}
 )
 
 func main() {
 	db := model.InitDB()
-	defer func() {
-		db.Close()
-		wg.Done()
-	}()
+	defer db.Close()
 
 	// Initialize database data
 	data := collector.CollectProblems()
-	model.AddAllProblemData(data)
+	model.AddProblemList(data)
 
 	// start discord
 	discord, err := discordgo.New()
@@ -38,14 +33,14 @@ func main() {
 	}
 	discord.AddHandler(onMessageCreate)
 	err = discord.Open()
-	wg.Add(1)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	fmt.Println("Listening...")
-	discord.ChannelMessageSend(RoomId, "Yo!!")
-	wg.Wait()
+	problem := model.GetRandomProblemData()
+	sendText := fmt.Sprintf("今日やるべき問題はこれだ！！\n :ballot_box_with_check: %s \n :link: %s\n", problem.Title, problem.Url)
+	discord.ChannelMessageSend(RoomId, sendText)
 	return
 }
 
@@ -64,10 +59,6 @@ func onMessageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		for _, a := range guildChannels {
 			sendText += fmt.Sprintf("%vチャンネルの%v(IDは%v)\n", a.Type, a.Name, a.ID)
 		}
-		sendMessage(s, c, sendText)
-	case strings.HasPrefix(m.Content, fmt.Sprintf("%s", "problem")):
-		data := model.GetRandomProblemData()
-		sendText := fmt.Sprintf("今日やるべき問題はこれだ！！\n :ballot_box_with_check: %s \n :link: %s\n", data.Title, data.Url)
 		sendMessage(s, c, sendText)
 	}
 }
